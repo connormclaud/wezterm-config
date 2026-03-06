@@ -53,6 +53,13 @@ WezTerm hot-reloads on save. To validate syntax:
 wezterm --config-file ~/.config/wezterm/wezterm.lua ls-fonts
 ```
 
+## See Also
+
+- [KevinSilvester/wezterm-config](https://github.com/KevinSilvester/wezterm-config) — feature-rich modular config with background selector, GPU adapter picker, and CI linting
+- [dragonlobster/wezterm-config](https://github.com/dragonlobster/wezterm-config) — clean single-file config with a great YouTube walkthrough
+- [awesome-wezterm](https://github.com/michaelbrusegard/awesome-wezterm) — curated list of WezTerm plugins and resources
+- [catppuccin/wezterm](https://github.com/catppuccin/wezterm) — official Catppuccin theme for WezTerm
+
 ## License
 
 [MIT](LICENSE)
