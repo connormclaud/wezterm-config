@@ -16,13 +16,14 @@ The config uses `wezterm.config_builder()` with a modular structure:
 - **`keys.lua`** — pane splits, pane kill, Shift+Enter CSI u passthrough, F2 context-aware tab/tmux rename (pre-fills current name)
 - **`tmux.lua`** — `tmux.detect(pane)` checks domain name and foreground process; `tmux.bin` resolves tmux path at config load (PATH first, then Homebrew fallback); left status indicator; `Ctrl+Shift+A` session picker that attaches via `tmux -CC`
 - **`health.lua`** — 20-20-20 rule: right-status warning every 20 minutes for 25 seconds; `Ctrl+Shift+H` toggle; `enabled` is module-level mutable state
+- **`resize.lua`** — `Alt+R` cycles active pane through size presets (25/33/50/67/75%); detects split axis automatically
 - **`help.lua`** — F1 InputSelector cheat sheet listing all keybindings in two-column layout
 - **`hooks/claude-state.sh`** — Claude Code hook script (Linux); emits OSC 1337 SetUserVar to ancestor PTY for tab state tracking; handles tmux passthrough
 - **`hooks/claude-state.zsh`** — Claude Code hook script (macOS); same as above using `ps` instead of `/proc`
 
 ## Keybindings
 
-Eight custom keys across four modules:
+Nine custom keys across five modules:
 
 | Key | Action | Module |
 |-----|--------|--------|
@@ -31,6 +32,7 @@ Eight custom keys across four modules:
 | `Ctrl+Shift+K` | Kill pane (no confirm) | `keys.lua` |
 | `Shift+Enter` | CSI u sequence (tmux-safe) | `keys.lua` |
 | `F2` | Rename tab / tmux window | `keys.lua` |
+| `Alt+R` | Cycle pane resize presets | `resize.lua` |
 | `Ctrl+Shift+A` | Tmux session picker | `tmux.lua` |
 | `Ctrl+Shift+H` | Health reminder toggle | `health.lua` |
 | `F1` | Help overlay | `help.lua` |

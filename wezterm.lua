@@ -7,6 +7,7 @@ local tmux   = require("tmux")
 local health = require("health")
 local help   = require("help")
 local keys   = require("keys")
+local resize = require("resize")
 
 -- Font: Iosevka at a comfortable size for 4K HiDPI
 config.font = wezterm.font("Iosevka", { weight = "Regular" })
@@ -80,7 +81,7 @@ config.warn_about_missing_glyphs = false
 
 -- Compose keybindings from all modules
 config.keys = {}
-for _, mod in ipairs({ theme, claude, tmux, health, help, keys }) do
+for _, mod in ipairs({ theme, claude, tmux, health, help, keys, resize }) do
   for _, k in ipairs(mod.keys()) do
     table.insert(config.keys, k)
   end
