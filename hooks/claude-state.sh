@@ -15,7 +15,8 @@ while [ "$pid" != "1" ] && [ -n "$pid" ]; do
 done
 [ -z "$TTY" ] && exit 0
 
-ENCODED=$(printf '%s' "$STATE" | base64 -w0)
+# Fast path: empty state clears the user var.
+if [ -z "$STATE" ]; then ENCODED=""; else ENCODED=$(printf '%s' "$STATE" | base64 -w0); fi
 if [ -n "$TMUX" ]; then
   printf '\033Ptmux;\033\033]1337;SetUserVar=%s=%s\007\033\\' \
     claude_state "$ENCODED" > "$TTY" 2>/dev/null

@@ -21,7 +21,8 @@ Modular [WezTerm](https://wezfurlong.org/wezterm/) configuration with Catppuccin
 | `tmux.lua` | Tmux detection, binary resolution, session picker, left status |
 | `health.lua` | 20-20-20 reminder with toggle |
 | `help.lua` | F1 keybinding cheat sheet |
-| `hooks/claude-state.sh` | Claude Code hook — emits WezTerm user vars for tab state |
+| `hooks/claude-state.sh` | Claude Code hook — emits WezTerm user vars for tab state (Linux) |
+| `hooks/claude-state.zsh` | Claude Code hook — same as above (macOS) |
 
 ## Keybindings
 
@@ -59,27 +60,30 @@ Tabs visually indicate Claude Code state in background tabs:
 | Needs input | Peach | `?` |
 | Done | Green | `✓` |
 
+State clears automatically when Claude Code exits (`SessionEnd` hook).
+
 This uses [Claude Code hooks](https://code.claude.com/docs/en/hooks). Add to `~/.claude/settings.json`:
 
 ```json
 {
   "hooks": {
-    "UserPromptSubmit": [{
-      "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooks/claude-state.sh running", "async": true }]
-    }],
-    "PostToolUse": [{
-      "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooks/claude-state.sh running", "async": true }]
+    "PreToolUse": [{
+      "hooks": [{ "type": "command", "command": "~/.config/wezterm/hooks/claude-state.sh running" }]
     }],
     "Notification": [{
-      "matcher": "permission_prompt|elicitation_dialog",
-      "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooks/claude-state.sh asking", "async": true }]
+      "hooks": [{ "type": "command", "command": "~/.config/wezterm/hooks/claude-state.sh asking" }]
     }],
     "Stop": [{
-      "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooks/claude-state.sh idle", "async": true }]
+      "hooks": [{ "type": "command", "command": "~/.config/wezterm/hooks/claude-state.sh idle" }]
+    }],
+    "SessionEnd": [{
+      "hooks": [{ "type": "command", "command": "~/.config/wezterm/hooks/claude-state.sh" }]
     }]
   }
 }
 ```
+
+On macOS, use `claude-state.zsh` instead — it resolves the TTY via `ps` rather than `/proc`.
 
 ## See Also
 
