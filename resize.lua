@@ -6,7 +6,7 @@ local presets = { 0.25, 0.33, 0.50, 0.67, 0.75 }
 
 local function detect_split(tab, active_id)
   local panes = tab:panes_with_info()
-  if #panes < 2 then return nil end
+  if #panes ~= 2 then return nil end
 
   local active
   for _, p in ipairs(panes) do
