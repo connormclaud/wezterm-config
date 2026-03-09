@@ -7,16 +7,46 @@
 STATE="$1"
 
 TTY=""
+CLAUDE_PID=""
 pid=$PPID
 while (( pid > 1 )); do
-  tty_name=$(ps -o tty= -p "$pid" 2>/dev/null | tr -d ' ')
-  if [[ -n "$tty_name" && "$tty_name" != "??" ]]; then
+  info=$(ps -o tty=,ucomm=,ppid= -p "$pid" 2>/dev/null)
+  tty_name=${${(z)info}[1]}
+  pname=${${(z)info}[2]}
+  next_pid=${${(z)info}[3]}
+
+  if [[ -z "$TTY" && -n "$tty_name" && "$tty_name" != "??" ]]; then
     TTY="/dev/$tty_name"
-    break
   fi
-  pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')
+  if [[ -z "$CLAUDE_PID" && ( "$pname" == "node" || "$pname" == "claude" ) ]]; then
+    CLAUDE_PID=$pid
+  fi
+
+  # Fast path: stop walking once we have everything we need.
+  [[ -n "$TTY" && ( "$STATE" != "idle" || -n "$CLAUDE_PID" ) ]] && break
+  pid=$next_pid
 done
 [[ -z "$TTY" ]] && exit 0
+
+# When Stop fires (idle), check if Claude still has background tasks running.
+# Background Bash/Agent tasks are descendant shell processes of the node process.
+if [[ "$STATE" == "idle" && -n "$CLAUDE_PID" ]]; then
+  has_bg_shell() {
+    local parent=$1 depth=${2:-0}
+    (( depth > 3 )) && return 1
+    local child cname
+    for child in $(pgrep -P "$parent" 2>/dev/null); do
+      [[ "$child" == "$$" ]] && continue
+      cname=$(ps -o ucomm= -p "$child" 2>/dev/null | tr -d ' ')
+      case "$cname" in
+        bash|zsh|sh|fish) return 0 ;;
+      esac
+      has_bg_shell "$child" $((depth + 1)) && return 0
+    done
+    return 1
+  }
+  has_bg_shell "$CLAUDE_PID" && STATE="running"
+fi
 
 # Fast path: empty state clears the user var.
 [[ -z "$STATE" ]] && ENCODED="" || ENCODED=$(printf '%s' "$STATE" | base64 | tr -d '\n')
