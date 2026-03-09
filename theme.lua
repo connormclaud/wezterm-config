@@ -37,6 +37,13 @@ function M.setup_tab_title()
     end
 
     if tab.is_active then
+      for _, fn in ipairs(pane_styles) do
+        local result = fn(tab, index, title)
+        if result then
+          table.insert(result, 1, { Background = { Color = M.surface } })
+          return result
+        end
+      end
       return {
         { Background = { Color = M.surface } },
         { Foreground = { Color = M.text } },
