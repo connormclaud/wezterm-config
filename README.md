@@ -62,7 +62,7 @@ Tabs visually indicate Claude Code state in background tabs:
 
 State clears automatically when Claude Code exits (`SessionEnd` hook).
 
-This uses [Claude Code hooks](https://code.claude.com/docs/en/hooks). Add to `~/.claude/settings.json`:
+This uses [Claude Code hooks](https://code.claude.com/docs/en/hooks). On macOS, use `.zsh` instead of `.sh` for the hook script. Add to `~/.claude/settings.json`:
 
 ```json
 {
