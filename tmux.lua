@@ -36,42 +36,33 @@ function M.is_cc(pane)
   return domain ~= nil and domain:lower():match("mux") ~= nil
 end
 
--- Maps WezTerm's active tab to the correct tmux @window_id via CC client.
-function M.resolve_window(window)
+-- Finds the CC-attached tmux session name.
+function M.resolve_session()
   if not M.bin then return nil end
-
-  local ok1, clients = wezterm.run_child_process({
+  local ok, clients = wezterm.run_child_process({
     M.bin, "list-clients", "-F", "#{client_control_mode}\t#{session_name}",
   })
-  if not ok1 then return nil end
-
-  local session = nil
+  if not ok then return nil end
   for line in clients:gmatch("[^\n]+") do
     local mode, name = line:match("^(%d+)\t(.+)$")
-    if mode == "1" then
-      session = name
-      break
-    end
+    if mode == "1" then return name end
   end
+  return nil
+end
+
+-- Returns the tmux @window_id for the session's active window (synced by CC).
+function M.resolve_window()
+  local session = M.resolve_session()
   if not session then return nil end
-
-  local ok2, win_out = wezterm.run_child_process({
-    M.bin, "list-windows", "-t", session, "-F", "#{window_id}",
+  local ok, out = wezterm.run_child_process({
+    M.bin, "list-windows", "-t", session,
+    "-F", "#{window_active}\t#{window_id}",
   })
-  if not ok2 then return nil end
-
-  local window_ids = {}
-  for line in win_out:gmatch("[^\n]+") do
-    table.insert(window_ids, line:match("^%s*(.-)%s*$"))
+  if not ok then return nil end
+  for line in out:gmatch("[^\n]+") do
+    local active, wid = line:match("^(%d+)\t(.+)$")
+    if active == "1" then return wid end
   end
-
-  local active_tab_id = window:active_tab():tab_id()
-  for _, t in ipairs(window:mux_window():tabs_with_info()) do
-    if t.tab:tab_id() == active_tab_id then
-      return window_ids[t.index + 1]
-    end
-  end
-
   return nil
 end
 
