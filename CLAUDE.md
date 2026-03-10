@@ -48,7 +48,9 @@ Errors appear in WezTerm's debug overlay: `Ctrl+Shift+L`.
 
 - Config is pure Lua using the WezTerm API (`wezterm` module)
 - Each module exports a `keys()` function; `wezterm.lua` merges them all into `config.keys`
-- `tmux.detect(pane)` in `tmux.lua` checks domain name and foreground process
+- `tmux.detect(pane)` in `tmux.lua` checks domain name and foreground process (matches both CC and local tmux panes)
+- `tmux.is_cc(pane)` returns true only for tmux CC domain panes (domain contains "mux"), not local panes where tmux is the foreground process; use this when running tmux commands via `run_child_process`
+- `tmux.resolve_window(window)` maps the active WezTerm tab to a tmux `@window_id` via the CC client session; returns nil on failure for graceful degradation
 - `tmux.bin` resolves the tmux binary path once at config load (PATH then Homebrew fallback)
 - `enabled` in `health.lua` is module-level mutable state toggled via keybinding callback
 - The `update-status` event drives both left status (tmux/shell indicator) and right status (health reminder)

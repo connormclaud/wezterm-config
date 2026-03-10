@@ -30,6 +30,51 @@ function M.detect(pane)
   return false
 end
 
+-- Returns true only for tmux CC domain panes, not local panes running tmux.
+function M.is_cc(pane)
+  local domain = pane:get_domain_name()
+  return domain ~= nil and domain:lower():match("mux") ~= nil
+end
+
+-- Maps WezTerm's active tab to the correct tmux @window_id via CC client.
+function M.resolve_window(window)
+  if not M.bin then return nil end
+
+  local ok1, clients = wezterm.run_child_process({
+    M.bin, "list-clients", "-F", "#{client_control_mode}\t#{session_name}",
+  })
+  if not ok1 then return nil end
+
+  local session = nil
+  for line in clients:gmatch("[^\n]+") do
+    local mode, name = line:match("^(%d+)\t(.+)$")
+    if mode == "1" then
+      session = name
+      break
+    end
+  end
+  if not session then return nil end
+
+  local ok2, win_out = wezterm.run_child_process({
+    M.bin, "list-windows", "-t", session, "-F", "#{window_id}",
+  })
+  if not ok2 then return nil end
+
+  local window_ids = {}
+  for line in win_out:gmatch("[^\n]+") do
+    table.insert(window_ids, line:match("^%s*(.-)%s*$"))
+  end
+
+  local active_tab_id = window:active_tab():tab_id()
+  for _, t in ipairs(window:mux_window():tabs_with_info()) do
+    if t.tab:tab_id() == active_tab_id then
+      return window_ids[t.index + 1]
+    end
+  end
+
+  return nil
+end
+
 local theme = require("theme")
 
 function M.update_left_status(window, pane)

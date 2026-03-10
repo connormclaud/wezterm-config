@@ -22,8 +22,11 @@ function M.keys()
       key = "K",
       mods = "CTRL|SHIFT",
       action = wezterm.action_callback(function(window, pane)
-        if tmux.detect(pane) and tmux.bin then
-          wezterm.run_child_process({ tmux.bin, "kill-pane" })
+        if tmux.is_cc(pane) and tmux.bin then
+          local target = tmux.resolve_window(window)
+          if target then
+            wezterm.run_child_process({ tmux.bin, "kill-pane", "-t", target })
+          end
         else
           window:perform_action(
             act.CloseCurrentPane({ confirm = false }),
@@ -55,8 +58,11 @@ function M.keys()
             initial_value = current,
             action = wezterm.action_callback(function(inner_window, inner_pane, line)
               if line then
-                if tmux.detect(inner_pane) and tmux.bin then
-                  wezterm.run_child_process({ tmux.bin, "rename-window", line })
+                if tmux.is_cc(inner_pane) and tmux.bin then
+                  local target = tmux.resolve_window(inner_window)
+                  if target then
+                    wezterm.run_child_process({ tmux.bin, "rename-window", "-t", target, line })
+                  end
                 else
                   inner_window:active_tab():set_title(line)
                 end
