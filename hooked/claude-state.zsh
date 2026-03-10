@@ -49,7 +49,7 @@ if [[ "$STATE" == "idle" && -n "$CLAUDE_PID" ]]; then
       [[ "$HOOK_CHAIN" == *" $child "* ]] && continue
       cname=$(ps -o ucomm= -p "$child" 2>/dev/null | tr -d ' ')
       case "$cname" in
-        bash|zsh|sh|fish|node|claude) return 0 ;;
+        bash|zsh|sh|fish) return 0 ;;
       esac
       has_bg_shell "$child" $((depth + 1)) && return 0
     done
