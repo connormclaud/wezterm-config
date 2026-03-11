@@ -12,6 +12,7 @@ M.green   = "#a6e3a1"
 M.yellow  = "#f9e2af"
 M.blue    = "#89b4fa"
 M.peach   = "#fab387"
+M.toxic   = "#4AE08C"
 
 -- Modules register custom per-pane styling via this list.
 -- Each fn(tab, index, title) returns formatted elements or nil to fall through.
