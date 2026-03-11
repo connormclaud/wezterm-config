@@ -18,7 +18,7 @@ config.line_height = 1.2
 config.color_scheme = "catppuccin-mocha"
 
 -- Window: borderless, padded, translucent
-config.window_decorations = "RESIZE"
+config.window_decorations = "NONE"
 config.window_padding = { left = 16, right = 16, top = 12, bottom = 12 }
 config.window_background_opacity = 0.93
 config.macos_window_background_blur = 20
