@@ -22,13 +22,25 @@ config.window_decorations = "RESIZE"
 config.window_padding = { left = 16, right = 16, top = 12, bottom = 12 }
 config.window_background_opacity = 0.93
 config.macos_window_background_blur = 20
+config.window_frame = {
+  border_left_width    = "1px",
+  border_right_width   = "1px",
+  border_top_height    = "1px",
+  border_bottom_height = "1px",
+  border_left_color    = theme.toxic,
+  border_right_color   = theme.toxic,
+  border_top_color     = theme.toxic,
+  border_bottom_color  = theme.toxic,
+  active_titlebar_bg   = theme.base,
+  inactive_titlebar_bg = theme.base,
+}
 
 -- Cursor
 config.default_cursor_style = "SteadyBar"
 config.cursor_thickness = 2
 
 -- Tab bar: minimal bottom bar
-config.use_fancy_tab_bar = false
+config.use_fancy_tab_bar = true
 config.tab_bar_at_bottom = true
 config.hide_tab_bar_if_only_one_tab = false
 config.tab_max_width = 32
