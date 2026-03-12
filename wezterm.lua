@@ -18,7 +18,9 @@ config.line_height = 1.2
 config.color_scheme = "catppuccin-mocha"
 
 -- Window: borderless, padded, translucent
-config.window_decorations = "NONE"
+-- NONE on Linux/Wayland avoids CSD miscalculating window area when maximized (#6318, #6834)
+-- RESIZE on macOS keeps native resize handles
+config.window_decorations = wezterm.target_triple:find("linux") and "NONE" or "RESIZE"
 config.window_padding = { left = 16, right = 16, top = 12, bottom = 12 }
 config.window_background_opacity = 0.93
 config.macos_window_background_blur = 20
