@@ -3,18 +3,18 @@ local wezterm = require("wezterm")
 local M = {}
 
 -- Resolve tmux binary path once at config load.
--- Tries PATH first (works on Linux), then Homebrew fallback (macOS GUI apps
--- don't inherit shell PATH).
+-- run_child_process yields across C-call boundary at require time, so use
+-- io.popen (synchronous) first, then wezterm.glob for Homebrew fallback.
 M.bin = (function()
-  local ok, _, stdout = pcall(wezterm.run_child_process, { "which", "tmux" })
-  if ok then
-    local p = stdout:match("^%s*(.-)%s*$")
+  local handle = io.popen("command -v tmux 2>/dev/null")
+  if handle then
+    local result = handle:read("*a")
+    handle:close()
+    local p = result and result:match("^%s*(.-)%s*$")
     if p and #p > 0 then return p end
   end
-  for _, p in ipairs({ "/opt/homebrew/bin/tmux", "/usr/local/bin/tmux" }) do
-    local f = io.open(p, "r")
-    if f then f:close(); return p end
-  end
+  for _, g in ipairs(wezterm.glob("/opt/homebrew/bin/tmux")) do return g end
+  for _, g in ipairs(wezterm.glob("/usr/local/bin/tmux")) do return g end
   return nil
 end)()
 
@@ -62,6 +62,22 @@ function M.resolve_window()
   for line in out:gmatch("[^\n]+") do
     local active, wid = line:match("^(%d+)\t(.+)$")
     if active == "1" then return wid end
+  end
+  return nil
+end
+
+-- Returns the tmux %pane_id for the active pane in the session's active window.
+function M.resolve_pane()
+  local win = M.resolve_window()
+  if not win then return nil end
+  local ok, out = wezterm.run_child_process({
+    M.bin, "list-panes", "-t", win,
+    "-F", "#{pane_active}\t#{pane_id}",
+  })
+  if not ok then return nil end
+  for line in out:gmatch("[^\n]+") do
+    local active, pid = line:match("^(%d+)\t(.+)$")
+    if active == "1" then return pid end
   end
   return nil
 end

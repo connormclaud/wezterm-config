@@ -23,7 +23,7 @@ function M.keys()
       mods = "CTRL|SHIFT",
       action = wezterm.action_callback(function(window, pane)
         if tmux.is_cc(pane) and tmux.bin then
-          local target = tmux.resolve_window()
+          local target = tmux.resolve_pane()
           if target then
             wezterm.run_child_process({ tmux.bin, "kill-pane", "-t", target })
           end

@@ -55,6 +55,7 @@ Errors appear in WezTerm's debug overlay: `Ctrl+Shift+L`.
 - `tmux.is_cc(pane)` returns true only for tmux CC domain panes (domain contains "mux"), not local panes where tmux is the foreground process; use this when running tmux commands via `run_child_process`
 - `tmux.resolve_session()` finds the CC-attached tmux session name via `list-clients`; returns nil if no CC client
 - `tmux.resolve_window()` returns the `@window_id` of the session's active window (synced by CC); returns nil on failure for graceful degradation
+- `tmux.resolve_pane()` returns the `%pane_id` of the session's active pane; use for pane-targeting commands like `kill-pane`
 - `tmux.bin` resolves the tmux binary path once at config load (PATH then Homebrew fallback)
 - `enabled` in `health.lua` is module-level mutable state toggled via keybinding callback
 - The `update-status` event drives both left status (tmux/shell indicator) and right status (health reminder)
