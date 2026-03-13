@@ -91,10 +91,16 @@ This uses [Claude Code hooks](https://code.claude.com/docs/en/hooks). Add to `~/
     "PermissionRequest": [{
       "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh asking", "async": true }]
     }],
-    "Notification": [{
-      "matcher": "permission_prompt|elicitation_dialog",
-      "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh asking", "async": true }]
-    }],
+    "Notification": [
+      {
+        "matcher": "permission_prompt|elicitation_dialog",
+        "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh asking", "async": true }]
+      },
+      {
+        "matcher": "idle_prompt",
+        "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh idle", "async": true }]
+      }
+    ],
     "Stop": [{
       "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh idle", "async": true }]
     }],
