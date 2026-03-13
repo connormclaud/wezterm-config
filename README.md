@@ -71,6 +71,10 @@ This uses [Claude Code hooks](https://code.claude.com/docs/en/hooks). Add to `~/
 ```json
 {
   "hooks": {
+    "SessionStart": [{
+      "matcher": "startup|resume",
+      "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh idle", "async": true }]
+    }],
     "UserPromptSubmit": [{
       "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh running", "async": true }]
     }],
@@ -101,6 +105,12 @@ This uses [Claude Code hooks](https://code.claude.com/docs/en/hooks). Add to `~/
         "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh idle", "async": true }]
       }
     ],
+    "SubagentStart": [{
+      "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh running", "async": true }]
+    }],
+    "SubagentStop": [{
+      "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh running", "async": true }]
+    }],
     "Stop": [{
       "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh idle", "async": true }]
     }],
