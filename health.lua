@@ -7,9 +7,19 @@ local enabled = true
 
 local theme = require("theme")
 
-function M.update_right_status(window)
+function M.update_right_status(window, pane)
   local bar_bg = theme.base
   local elements = {}
+
+  -- Pane title (e.g. "⏳ Claude Code" set via OSC 0)
+  if pane then
+    local title = pane:get_title()
+    if title and #title > 0 then
+      table.insert(elements, { Background = { Color = bar_bg } })
+      table.insert(elements, { Foreground = { Color = theme.overlay } })
+      table.insert(elements, { Text = title .. "  " })
+    end
+  end
 
   -- Pane info: count + zoom state
   local tab = window:active_tab()
