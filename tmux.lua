@@ -81,6 +81,32 @@ function M.resolve_pane()
   return nil
 end
 
+-- Swap the active tmux window with its neighbor (direction: -1 left, +1 right).
+function M.swap_window(direction)
+  local session = M.resolve_session()
+  if not session then return end
+  local ok, out = wezterm.run_child_process({
+    M.bin, "list-windows", "-t", session,
+    "-F", "#{window_id}\t#{window_active}",
+  })
+  if not ok then return end
+  local windows = {}
+  local active_idx = nil
+  for line in out:gmatch("[^\n]+") do
+    local wid, is_active = line:match("^(.+)\t(%d+)$")
+    if wid then
+      table.insert(windows, wid)
+      if is_active == "1" then active_idx = #windows end
+    end
+  end
+  if not active_idx then return end
+  local target_idx = active_idx + direction
+  if target_idx < 1 or target_idx > #windows then return end
+  wezterm.run_child_process({
+    M.bin, "swap-window", "-d", "-s", windows[active_idx], "-t", windows[target_idx],
+  })
+end
+
 local theme = require("theme")
 
 function M.update_left_status(window, pane)

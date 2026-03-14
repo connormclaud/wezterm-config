@@ -78,6 +78,28 @@ function M.keys()
         )
       end),
     },
+    -- Move tab left (tmux CC: swap-window, local: MoveTabRelative)
+    {
+      key = "PageUp",
+      mods = "CTRL|SHIFT",
+      action = wezterm.action_callback(function(window, pane)
+        if tmux.is_cc(pane) then
+          tmux.swap_window(-1)
+        end
+        window:perform_action(act.MoveTabRelative(-1), pane)
+      end),
+    },
+    -- Move tab right
+    {
+      key = "PageDown",
+      mods = "CTRL|SHIFT",
+      action = wezterm.action_callback(function(window, pane)
+        if tmux.is_cc(pane) then
+          tmux.swap_window(1)
+        end
+        window:perform_action(act.MoveTabRelative(1), pane)
+      end),
+    },
   }
 end
 

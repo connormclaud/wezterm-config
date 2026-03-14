@@ -48,6 +48,7 @@ local choices = format_columns({
       { "Ctrl+Shift+K",    "Kill current pane" },
       { "Ctrl+Shift+O",    "Pane select (jump)" },
       { "F2",              "Rename tab / tmux window" },
+      { "Ctrl+Shift+PgUp/Dn", "Move tab left / right" },
       { "Alt+R",           "Cycle pane size (25/33/50/67/75%)" },
     },
   },
