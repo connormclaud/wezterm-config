@@ -46,6 +46,17 @@ function M.make_window_frame(color)
   }
 end
 
+-- Linear interpolation between two #rrggbb hex colors; t clamped to 0–1
+function M.lerp_color(c1, c2, t)
+  t = math.max(0, math.min(1, t))
+  local r1, g1, b1 = tonumber(c1:sub(2, 3), 16), tonumber(c1:sub(4, 5), 16), tonumber(c1:sub(6, 7), 16)
+  local r2, g2, b2 = tonumber(c2:sub(2, 3), 16), tonumber(c2:sub(4, 5), 16), tonumber(c2:sub(6, 7), 16)
+  local r = math.floor(r1 + (r2 - r1) * t + 0.5)
+  local g = math.floor(g1 + (g2 - g1) * t + 0.5)
+  local b = math.floor(b1 + (b2 - b1) * t + 0.5)
+  return string.format("#%02x%02x%02x", r, g, b)
+end
+
 -- Modules register custom per-pane styling via this list.
 -- Each fn(tab [, index, title]) returns { bg, fg, icon, bold } or nil to fall through.
 local pane_styles = {}

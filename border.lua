@@ -3,7 +3,7 @@ local theme = require("theme")
 
 local M = {}
 
-local ESCALATION_SECS = 15
+local ESCALATION_SECS = 120
 
 local STATE_COLORS = {
   asking  = theme.peach,
@@ -13,7 +13,7 @@ local STATE_COLORS = {
 
 function M.update_border(window)
   local dominated = "idle"
-  local any_escalated = false
+  local max_elapsed = 0
 
   for _, tab in ipairs(window:mux_window():tabs()) do
     for _, pane in ipairs(tab:panes()) do
@@ -22,8 +22,9 @@ function M.update_border(window)
         dominated = "asking"
         local key = tostring(pane:pane_id())
         local since = (wezterm.GLOBAL.asking_since or {})[key]
-        if since and (os.time() - since) >= ESCALATION_SECS then
-          any_escalated = true
+        if since then
+          local elapsed = os.time() - since
+          if elapsed > max_elapsed then max_elapsed = elapsed end
         end
       elseif state == "running" and dominated ~= "asking" then
         dominated = "running"
@@ -32,12 +33,13 @@ function M.update_border(window)
   end
 
   local color = STATE_COLORS[dominated] or theme.toxic
-  if dominated == "asking" and any_escalated then
-    color = theme.red
+  if dominated == "asking" then
+    local t = math.min(max_elapsed / ESCALATION_SECS, 1)
+    color = theme.lerp_color(theme.peach, theme.red, t)
   end
 
   local key = "border_state_" .. tostring(window:window_id())
-  local cache_val = dominated .. (any_escalated and "_esc" or "")
+  local cache_val = dominated .. "_" .. tostring(max_elapsed)
   local prev = (wezterm.GLOBAL.border_states or {})[key]
   if prev == cache_val then return end
 

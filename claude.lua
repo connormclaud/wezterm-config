@@ -3,7 +3,7 @@ local theme = require("theme")
 
 local M = {}
 
-local ESCALATION_SECS = 15
+local ESCALATION_SECS = 120
 
 -- Track when each pane enters "asking" state
 wezterm.on("user-var-changed", function(_window, pane, name, value)
@@ -27,10 +27,12 @@ theme.register_pane_style(function(tab)
   elseif state == "asking" then
     local key = tostring(tab.active_pane.pane_id)
     local since = (wezterm.GLOBAL.asking_since or {})[key]
-    if since and (os.time() - since) >= ESCALATION_SECS then
-      return { bg = theme.red, fg = theme.base, icon = theme.ICON_ASKING, bold = true }
+    local t = 0
+    if since then
+      t = math.min((os.time() - since) / ESCALATION_SECS, 1)
     end
-    return { bg = theme.peach, fg = theme.base, icon = theme.ICON_ASKING, bold = true }
+    local bg = theme.lerp_color(theme.peach, theme.red, t)
+    return { bg = bg, fg = theme.base, icon = theme.ICON_ASKING, bold = true }
   elseif state == "idle" then
     return { bg = theme.green, fg = theme.base, icon = theme.ICON_IDLE, bold = true }
   end
