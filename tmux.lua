@@ -36,50 +36,52 @@ function M.is_cc(pane)
   return pane:get_domain_name() == "tmux"
 end
 
+-- Run a tmux command, parse each line with pattern, return all captures from
+-- the first line where predicate(captures...) is truthy.
+local function tmux_find(args, pattern, predicate)
+  local ok, out = wezterm.run_child_process(args)
+  if not ok then return nil end
+  for line in out:gmatch("[^\n]+") do
+    local captures = { line:match(pattern) }
+    if #captures > 0 and predicate(table.unpack(captures)) then
+      return table.unpack(captures)
+    end
+  end
+end
+
 -- Finds the CC-attached tmux session name.
 function M.resolve_session()
   if not M.bin then return nil end
-  local ok, clients = wezterm.run_child_process({
-    M.bin, "list-clients", "-F", "#{client_control_mode}\t#{session_name}",
-  })
-  if not ok then return nil end
-  for line in clients:gmatch("[^\n]+") do
-    local mode, name = line:match("^(%d+)\t(.+)$")
-    if mode == "1" then return name end
-  end
-  return nil
+  local _, name = tmux_find(
+    { M.bin, "list-clients", "-F", "#{client_control_mode}\t#{session_name}" },
+    "^(%d+)\t(.+)$",
+    function(mode) return mode == "1" end
+  )
+  return name
 end
 
 -- Returns the tmux @window_id for the session's active window (synced by CC).
 function M.resolve_window()
   local session = M.resolve_session()
   if not session then return nil end
-  local ok, out = wezterm.run_child_process({
-    M.bin, "list-windows", "-t", session,
-    "-F", "#{window_active}\t#{window_id}",
-  })
-  if not ok then return nil end
-  for line in out:gmatch("[^\n]+") do
-    local active, wid = line:match("^(%d+)\t(.+)$")
-    if active == "1" then return wid end
-  end
-  return nil
+  local _, wid = tmux_find(
+    { M.bin, "list-windows", "-t", session, "-F", "#{window_active}\t#{window_id}" },
+    "^(%d+)\t(.+)$",
+    function(active) return active == "1" end
+  )
+  return wid
 end
 
 -- Returns the tmux %pane_id for the active pane in the session's active window.
 function M.resolve_pane()
   local win = M.resolve_window()
   if not win then return nil end
-  local ok, out = wezterm.run_child_process({
-    M.bin, "list-panes", "-t", win,
-    "-F", "#{pane_active}\t#{pane_id}",
-  })
-  if not ok then return nil end
-  for line in out:gmatch("[^\n]+") do
-    local active, pid = line:match("^(%d+)\t(.+)$")
-    if active == "1" then return pid end
-  end
-  return nil
+  local _, pid = tmux_find(
+    { M.bin, "list-panes", "-t", win, "-F", "#{pane_active}\t#{pane_id}" },
+    "^(%d+)\t(.+)$",
+    function(active) return active == "1" end
+  )
+  return pid
 end
 
 -- Swap the active tmux window with its neighbor (direction: -1 left, +1 right).
