@@ -71,8 +71,4 @@ function M.setup_tab_title()
   end)
 end
 
-function M.keys()
-  return {}
-end
-
 return M

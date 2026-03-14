@@ -49,8 +49,4 @@ theme.register_pane_style(function(tab, index, title)
   return nil
 end)
 
-function M.keys()
-  return {}
-end
-
 return M

@@ -1,7 +1,10 @@
 local wezterm = require("wezterm")
 local act = wezterm.action
+local theme = require("theme")
 
 local M = {}
+
+-- Detection -----------------------------------------------------------------
 
 -- Resolve tmux binary path once at config load.
 -- run_child_process yields across C-call boundary at require time, so use
@@ -35,6 +38,8 @@ end
 function M.is_cc(pane)
   return pane:get_domain_name() == "tmux"
 end
+
+-- Resolution ----------------------------------------------------------------
 
 -- Run a tmux command, parse each line with pattern, return all captures from
 -- the first line where predicate(captures...) is truthy.
@@ -83,6 +88,8 @@ function M.resolve_pane()
   )
   return pid
 end
+
+-- Actions -------------------------------------------------------------------
 
 -- Swap the active tmux window with its neighbor (direction: -1 left, +1 right).
 function M.swap_window(direction)
@@ -166,7 +173,7 @@ function M.move_tab_action(direction)
   end)
 end
 
-local theme = require("theme")
+-- Status --------------------------------------------------------------------
 
 function M.update_left_status(window, pane)
   if M.detect(pane) then
