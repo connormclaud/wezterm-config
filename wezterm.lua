@@ -10,8 +10,11 @@ local keys   = require("keys")
 local resize = require("resize")
 
 -- Font: Iosevka at a comfortable size for 4K HiDPI
-config.font = wezterm.font("Iosevka", { weight = "Regular" })
-config.font_size = 13.0
+config.font = wezterm.font_with_fallback({
+  { family = "Iosevka", weight = "Regular" },
+  "Symbols Nerd Font Mono",
+})
+config.font_size = 14.0
 config.line_height = 1.2
 
 -- Color scheme
@@ -42,12 +45,17 @@ config.default_cursor_style = "SteadyBar"
 config.cursor_thickness = 2
 
 -- Tab bar: minimal bottom bar
-config.use_fancy_tab_bar = true
+config.use_fancy_tab_bar = false
 config.tab_bar_at_bottom = true
 config.hide_tab_bar_if_only_one_tab = false
-config.tab_max_width = 32
+config.tab_max_width = 48
 config.show_new_tab_button_in_tab_bar = false
 config.show_close_tab_button_in_tabs = false
+
+-- Tab bar colors (retro mode — format-tab-title handles per-tab rendering)
+-- Merge into config.colors to avoid clobbering any color_scheme overrides
+config.colors = config.colors or {}
+config.colors.tab_bar = { background = theme.base }
 
 -- Scrollback
 config.scrollback_lines = 100000

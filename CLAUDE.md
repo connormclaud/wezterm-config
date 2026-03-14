@@ -11,8 +11,8 @@ This is a WezTerm terminal emulator configuration, split into modular Lua files.
 The config uses `wezterm.config_builder()` with a modular structure:
 
 - **`wezterm.lua`** — entry point; loads modules, merges keybindings from each module's `keys()` export, sets up the `update-status` event (left status from tmux, right status from health)
-- **`theme.lua`** — catppuccin mocha palette (single source of truth); owns `format-tab-title` with `register_pane_style(fn)` for module-injected per-pane styling
-- **`claude.lua`** — registers Claude Code tab state styles (running/asking/idle) with theme via `register_pane_style`
+- **`theme.lua`** — catppuccin mocha palette (single source of truth); powerline glyph and Nerd Font icon constants; owns `format-tab-title` with retro tab bar powerline rendering and `register_pane_style(fn)` for module-injected per-pane styling
+- **`claude.lua`** — registers Claude Code tab state styles (running/asking/idle) with theme via `register_pane_style`; returns `{ bg, fg, icon, bold }` tables consumed by theme's powerline renderer
 - **`keys.lua`** — declarative keybinding table: pane splits, Shift+Enter CSI u passthrough, plus tmux action factories from `tmux.lua` (kill pane, rename tab, move tab)
 - **`tmux.lua`** — `tmux.detect(pane)` checks domain name and foreground process; `tmux.bin` resolves tmux path at config load (PATH first, then Homebrew fallback); action factories (`kill_pane_action`, `rename_tab_action`, `move_tab_action`) encapsulate all tmux-vs-local branching; left status indicator; `Ctrl+Shift+A` session picker that attaches via `tmux -CC`
 - **`health.lua`** — 20-20-20 rule: right-status warning every 20 minutes for 25 seconds; `Ctrl+Shift+H` toggle; `enabled` is module-level mutable state
@@ -62,8 +62,10 @@ Errors appear in WezTerm's debug overlay: `Ctrl+Shift+L`.
 - `tmux.bin` resolves the tmux binary path once at config load (PATH then Homebrew fallback)
 - `enabled` in `health.lua` is module-level mutable state toggled via keybinding callback
 - The `update-status` event drives both left status (tmux/shell indicator) and right status (health reminder)
-- All color constants live in `theme.lua` as the single source of truth; modules require theme and use `theme.green`, `theme.subtext`, etc.
-- `theme.register_pane_style(fn)` lets modules inject custom tab styling; `claude.lua` uses this for state-based tab indicators
+- All color constants, powerline glyphs (`SOLID_RIGHT`, `SOLID_LEFT`), and Nerd Font icons (`ICON_RUNNING`, `ICON_ASKING`, `ICON_IDLE`) live in `theme.lua` as the single source of truth; modules require theme and use `theme.green`, `theme.subtext`, etc.
+- The tab bar uses retro mode (`use_fancy_tab_bar = false`) for full powerline rendering; `wezterm.font_with_fallback` adds Symbols Nerd Font Mono for glyph coverage
+- `theme.register_pane_style(fn)` lets modules inject custom tab styling; callbacks return `{ bg, fg, icon, bold }` or nil; active tabs render as colored powerline pills, inactive tabs with state render as colored text
+- Health icons use Nerd Font glyphs (eye, bell, bell-slash) to match the flat theme
 - `hooked/claude-state.sh` (Linux) walks `/proc` to find ancestor PTY since Claude Code redirects hook stdout; `hooked/claude-state.zsh` (macOS) uses `ps` instead
 - Hook events: `SessionStart` (startup|resume) → idle, `UserPromptSubmit` → running, `PreToolUse` → running (except `AskUserQuestion`/`ExitPlanMode` → asking), `PostToolUse` → running (catch-all; clears asking after permission approval or answered question), `PermissionRequest` → asking, `SubagentStart` → running, `Stop` → idle, `SessionEnd` → clear (no argument); configured in `~/.claude/settings.json`
 - Avoided hooks: `SubagentStop` races with `Stop` — it fires twice per subagent (converted inner Stop + actual SubagentStop) and the second completes after `Stop`, overwriting idle with running. `Notification` hooks race with `PostToolUse`/`Stop` — async backup signals can arrive late and overwrite state transitions; `PermissionRequest` and `PreToolUse` already cover all asking transitions. Both are redundant (`PreToolUse`/`UserPromptSubmit` already cover running, `Stop` covers idle).

@@ -13,7 +13,7 @@ function M.update_right_status(window)
     local cycle = now % interval_seconds
     if cycle < 25 then
       local remaining = 25 - cycle
-      local msg = string.format(" ⚠ Look away ~6m for %ds ", remaining)
+      local msg = string.format(" \u{f06e} Look away ~6m for %ds ", remaining)
       window:set_right_status(wezterm.format({
         { Foreground = { Color = theme.base } },
         { Background = { Color = theme.yellow } },
@@ -23,13 +23,13 @@ function M.update_right_status(window)
     else
       window:set_right_status(wezterm.format({
         { Foreground = { Color = theme.subtext } },
-        { Text = " 🔔 " },
+        { Text = " \u{f0f3} " },
       }))
     end
   else
     window:set_right_status(wezterm.format({
       { Foreground = { Color = theme.subtext } },
-      { Text = " 🔕 " },
+      { Text = " \u{f1f6} " },
     }))
   end
 end

@@ -8,10 +8,10 @@ Modular [WezTerm](https://wezfurlong.org/wezterm/) configuration with Catppuccin
 
 ## Features
 
-- **Catppuccin Mocha** color scheme with translucent, borderless window
+- **Catppuccin Mocha** color scheme with translucent, borderless window and powerline tab bar
 - **Tmux integration** — auto-detects tmux panes, session picker (`Ctrl+Shift+A`), context-aware tab rename
 - **20-20-20 health reminders** — status bar warning every 20 minutes to look away for 20 seconds
-- **Claude Code tab tracking** — tabs change color by state: blue (running), peach (needs input), green (done)
+- **Claude Code tab tracking** — Nerd Font icons and colored powerline tabs by state: 󰚩 running (blue), asking (peach), 󰄬 idle (green)
 - **F1 cheat sheet** — overlay listing all keybindings
 
 ## Structure
@@ -56,13 +56,15 @@ wezterm --config-file ~/.config/wezterm/wezterm.lua ls-fonts
 
 ## Claude Code Tab Tracking
 
-Tabs visually indicate Claude Code state in background tabs:
+Active tabs show state as a colored powerline pill; inactive tabs show state as colored text:
 
-| State | Color | Indicator |
-|-------|-------|-----------|
-| Running | Blue | `…` |
-| Needs input | Peach | `?` |
-| Done | Green | `✓` |
+| State | Icon | Color | Active | Inactive |
+|-------|------|-------|--------|----------|
+| Running | 󰚩 | Blue | Pill bg | Colored text |
+| Asking | | Peach | Pill bg | Colored text |
+| Idle | 󰄬 | Green | Pill bg | Colored text |
+
+Requires [Symbols Nerd Font Mono](https://www.nerdfonts.com/) installed as a font fallback.
 
 State clears automatically when Claude Code exits (`SessionEnd` hook).
 
