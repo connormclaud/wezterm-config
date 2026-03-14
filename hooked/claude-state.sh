@@ -1,59 +1,26 @@
 #!/bin/bash
 # Claude Code hook: emit WezTerm user var for tab state tracking.
-# Usage: claude-state.sh <running|asking|idle>
+# Usage: claude-state.sh [running|asking|idle]
+# No argument clears the state (SessionEnd).
 #
-# Claude Code redirects hook stdout to files, so /dev/tty is unavailable.
-# We walk the process tree to find the ancestor's PTY device instead.
+# Claude Code redirects hook stdout, so we walk /proc to find the
+# ancestor PTY and write the OSC escape directly.
 STATE="$1"
 
+# Walk up the process tree to find the first ancestor with a PTY on stdout.
 TTY=""
-CLAUDE_PID=""
 pid=$PPID
 while [ "$pid" != "1" ] && [ -n "$pid" ]; do
   fd=$(readlink /proc/$pid/fd/1 2>/dev/null)
-  if [[ "$fd" == /dev/pts/* ]] && [ -z "$TTY" ]; then TTY="$fd"; fi
-  pname=$(cat /proc/$pid/comm 2>/dev/null)
-  if [ -z "$CLAUDE_PID" ] && { [ "$pname" = "node" ] || [ "$pname" = "claude" ]; }; then CLAUDE_PID=$pid; fi
-  # Fast path: stop walking once we have everything we need.
-  if [ -n "$TTY" ]; then
-    if [ "$STATE" != "idle" ] || [ -n "$CLAUDE_PID" ]; then break; fi
-  fi
+  if [[ "$fd" == /dev/pts/* ]]; then TTY="$fd"; break; fi
   pid=$(cut -d' ' -f4 /proc/$pid/stat 2>/dev/null)
 done
 [ -z "$TTY" ] && exit 0
 
-# When Stop fires (idle), check if Claude still has background tasks running.
-# Background Bash/Agent tasks are descendant shell processes of the node process.
-if [ "$STATE" = "idle" ] && [ -n "$CLAUDE_PID" ]; then
-  # Collect hook's own process chain to exclude from background detection.
-  # On Linux, sh(dash) -c doesn't exec-optimize, leaving a wrapper shell
-  # that would be falsely detected as a background task.
-  HOOK_CHAIN=" $$ "
-  _hpid=$PPID
-  while [ "$_hpid" != "1" ] && [ -n "$_hpid" ] && [ "$_hpid" != "$CLAUDE_PID" ]; do
-    HOOK_CHAIN="${HOOK_CHAIN}${_hpid} "
-    _hpid=$(cut -d' ' -f4 /proc/$_hpid/stat 2>/dev/null)
-  done
+# Encode state as base64 (empty state -> empty value to clear the var).
+if [ -n "$STATE" ]; then ENCODED=$(printf '%s' "$STATE" | base64 -w0); else ENCODED=""; fi
 
-  has_bg_shell() {
-    local parent=$1 depth=${2:-0}
-    [ "$depth" -gt 3 ] && return 1
-    local child cname
-    for child in $(pgrep -P "$parent" 2>/dev/null); do
-      case "$HOOK_CHAIN" in *" $child "*) continue ;; esac
-      cname=$(cat /proc/$child/comm 2>/dev/null)
-      case "$cname" in
-        bash|zsh|sh|fish) return 0 ;;
-      esac
-      has_bg_shell "$child" $((depth + 1)) && return 0
-    done
-    return 1
-  }
-  has_bg_shell "$CLAUDE_PID" && STATE="running"
-fi
-
-# Fast path: empty state clears the user var.
-if [ -z "$STATE" ]; then ENCODED=""; else ENCODED=$(printf '%s' "$STATE" | base64 -w0); fi
+# Emit OSC 1337 SetUserVar, with tmux DCS passthrough if needed.
 if [ -n "$TMUX" ]; then
   printf '\033Ptmux;\033\033]1337;SetUserVar=%s=%s\007\033\\' \
     claude_state "$ENCODED" > "$TTY" 2>/dev/null
