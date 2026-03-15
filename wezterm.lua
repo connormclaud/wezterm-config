@@ -64,6 +64,13 @@ config.show_close_tab_button_in_tabs = false
 -- Merge into config.colors to avoid clobbering any color_scheme overrides
 config.colors = config.colors or {}
 config.colors.tab_bar = { background = theme.base }
+config.colors.split = theme.overlay
+
+-- Pane focus: dim inactive panes to improve active-pane contrast in splits
+config.inactive_pane_hsb = {
+  saturation = 0.88,
+  brightness = 0.75,
+}
 
 -- Scrollback
 config.scrollback_lines = 100000

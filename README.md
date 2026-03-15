@@ -8,7 +8,7 @@ Modular [WezTerm](https://wezfurlong.org/wezterm/) configuration with Catppuccin
 
 ## Features
 
-- **Catppuccin Mocha** color scheme with translucent, borderless window and powerline tab bar
+- **Catppuccin Mocha** color scheme with translucent, borderless window, powerline tab bar, and active-pane focus contrast
 - **Tmux integration** — auto-detects tmux panes, session picker (`Ctrl+Shift+A`), context-aware tab rename
 - **20-20-20 health reminders** — status bar warning every 20 minutes to look away for 20 seconds
 - **Claude Code tab tracking** — Nerd Font icons and colored powerline tabs by state: 󰚩 running (blue), asking (peach), 󰄬 idle (green)
