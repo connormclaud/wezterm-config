@@ -29,8 +29,10 @@ end
 
 local function resolve_tmux_from_homebrew()
   for _, path in ipairs(HOMEBREW_TMUX_PATHS) do
-    for _, match in ipairs(wezterm.glob(path)) do
-      return match
+    local f = io.open(path, "r")
+    if f then
+      f:close()
+      return path
     end
   end
   return nil
