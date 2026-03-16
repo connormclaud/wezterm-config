@@ -26,7 +26,7 @@ config.color_scheme = "catppuccin-mocha"
 -- RESIZE on macOS keeps native resize handles
 config.window_decorations = wezterm.target_triple:find("linux") and "NONE" or "RESIZE"
 config.window_padding = { left = 16, right = 16, top = 12, bottom = 12 }
-config.window_background_opacity = 1.0
+config.window_background_opacity = wezterm.target_triple:find("darwin") and 1.0 or 0.965
 config.window_frame = theme.make_window_frame(theme.toxic)
 
 -- Cursor
