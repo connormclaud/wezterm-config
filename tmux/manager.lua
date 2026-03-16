@@ -189,6 +189,7 @@ end
 local function action_choices(session_name, cc)
   local choices = {}
   if cc then
+    table.insert(choices, { id = "switch", label = "Switch to workspace" })
     table.insert(choices, { id = "detach", label = "Detach (CC)" })
   else
     table.insert(choices, { id = "attach", label = "Attach (tmux -CC)" })
@@ -207,13 +208,25 @@ local function show_actions(window, pane, session_name, cc)
       action = wezterm.action_callback(function(win, p, action_id)
         if not action_id then return end
 
-        if action_id == "detach" then
+        if action_id == "switch" then
+          win:perform_action(
+            act.SwitchToWorkspace({ name = session_name }),
+            p
+          )
+        elseif action_id == "detach" then
           wezterm.run_child_process({ core.bin, "detach-client", "-s", session_name })
         elseif action_id == "attach" then
           win:perform_action(
-            act.SpawnCommandInNewTab({
-              domain = { DomainName = "local" },
-              args = { core.bin, "-CC", "attach", "-t", session_name },
+            act.SwitchToWorkspace({
+              name = session_name,
+              spawn = {
+                domain = { DomainName = "local" },
+                args = {
+                  "sh", "-c",
+                  'printf \'\\033]1337;SetUserVar=%s=%s\\007\' tmux_cc_control dHJ1ZQ== && exec "$0" "$@"',
+                  core.bin, "-CC", "attach", "-t", session_name,
+                },
+              },
             }),
             p
           )

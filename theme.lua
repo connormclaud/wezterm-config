@@ -184,8 +184,18 @@ local function inactive_tab_elements(tab, style, bar_bg, index, title, hover)
   return elements
 end
 
+local CONTROL_TAB_ELEMENTS = {
+  { Background = { Color = M.base } },
+  { Foreground = { Color = M.overlay } },
+  { Text = " " .. M.ICON_TERMINAL .. " " },
+}
+
 function M.setup_tab_title()
   wezterm.on("format-tab-title", function(tab, _tabs, _panes, _cfg, hover)
+    if tab.active_pane.user_vars.tmux_cc_control == "true" then
+      return CONTROL_TAB_ELEMENTS
+    end
+
     local index = tab.tab_index + 1
     local title = resolve_tab_title(tab)
     local style = resolve_style(tab, index, title)
