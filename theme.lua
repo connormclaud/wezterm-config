@@ -27,7 +27,7 @@ M.ICON_IDLE    = "\u{f012c}" -- 󰄬
 
 -- Status bar icons (Nerd Font)
 M.ICON_TERMINAL = "\u{f489}"  --  (nf-md-console)
-M.ICON_PANES    = "\u{f7a5}"  --  (nf-md-dock_window)
+M.ICON_PANES    = "\u{f07a5}" -- 󰞥 (nf-md-dock_window)
 M.ICON_ZOOM     = "\u{f065}"  --  (nf-fa-expand)
 
 -- Window frame factory (single source of truth for border structure)

@@ -26,27 +26,7 @@ config.color_scheme = "catppuccin-mocha"
 -- RESIZE on macOS keeps native resize handles
 config.window_decorations = wezterm.target_triple:find("linux") and "NONE" or "RESIZE"
 config.window_padding = { left = 16, right = 16, top = 12, bottom = 12 }
--- macos_window_background_blur removed: causes persistent high GPU usage via
--- macOS WindowServer (upstream #5555); no fix possible from config side.
-config.background = {
-  {
-    source = { Color = theme.base },
-    width = "100%",
-    height = "100%",
-    opacity = 1.0,
-  },
-  {
-    source = { Gradient = {
-      orientation = { Radial = { cx = 0.5, cy = 0.5, radius = 0.9 } },
-      colors = { "rgba(0,0,0,0)", theme.mantle },
-      interpolation = "Linear",
-      blend = "Rgb",
-    }},
-    width = "100%",
-    height = "100%",
-    opacity = 0.22,
-  },
-}
+config.window_background_opacity = 1.0
 config.window_frame = theme.make_window_frame(theme.toxic)
 
 -- Cursor
@@ -110,7 +90,7 @@ end)
 -- Rendering
 config.enable_wayland = true
 config.front_end = "WebGpu"
-config.webgpu_power_preference = wezterm.target_triple:find("darwin") and "HighPerformance" or "LowPower"
+config.webgpu_power_preference = "LowPower"
 
 -- Misc
 config.enable_kitty_keyboard = true
