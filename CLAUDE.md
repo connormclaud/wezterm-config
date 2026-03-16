@@ -12,7 +12,7 @@ The config uses `wezterm.config_builder()` with a modular structure:
 
 - **`wezterm.lua`** — entry point; loads modules, merges keybindings from each module's `keys()` export, sets up the `update-status` event (left status from tmux, right status from health)
 - **`theme.lua`** — catppuccin mocha palette (single source of truth); powerline glyph and Nerd Font icon constants; owns `format-tab-title` with retro tab bar powerline rendering and `register_pane_style(fn)` for module-injected per-pane styling
-- **`claude.lua`** — registers Claude Code tab state styles (running/asking/idle) with theme via `register_pane_style`; returns `{ bg, fg, icon, bold }` tables consumed by theme's powerline renderer
+- **`claude.lua`** — registers Claude Code tab state styles (running/asking/idle) with theme via `register_pane_style`; returns `{ bg, fg, icon, bold }` tables consumed by theme's powerline renderer; uses static colors (no escalation) for performance
 - **`keys.lua`** — declarative keybinding table: pane splits, Shift+Enter CSI u passthrough, plus tmux action factories from `tmux.lua` (kill pane, rename tab, move tab)
 - **`tmux.lua`** — `tmux.detect(pane)` checks domain name and foreground process; `tmux.bin` resolves tmux path at config load (PATH first, then Homebrew fallback); action factories (`kill_pane_action`, `rename_tab_action`, `move_tab_action`) encapsulate all tmux-vs-local branching; left status indicator; `Ctrl+Shift+A` session picker that attaches via `tmux -CC`
 - **`health.lua`** — 20-20-20 rule: right-status warning every 20 minutes for 25 seconds; `Ctrl+Shift+H` toggle; `enabled` is module-level mutable state
