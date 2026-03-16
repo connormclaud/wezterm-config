@@ -21,16 +21,15 @@ function M.update_right_status(window, pane)
     end
   end
 
-  -- Pane info: count + zoom state
+  -- Pane info: count + zoom state (single API call instead of panes() + panes_with_info())
   local tab = window:active_tab()
-  local pane_count = tab and #tab:panes() or 1
+  local panes_info = tab and tab:panes_with_info() or {}
+  local pane_count = #panes_info
   local is_zoomed = false
-  if tab then
-    for _, p in ipairs(tab:panes_with_info()) do
-      if p.is_zoomed then
-        is_zoomed = true
-        break
-      end
+  for _, p in ipairs(panes_info) do
+    if p.is_zoomed then
+      is_zoomed = true
+      break
     end
   end
 

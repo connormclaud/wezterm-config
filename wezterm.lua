@@ -26,13 +26,14 @@ config.color_scheme = "catppuccin-mocha"
 -- RESIZE on macOS keeps native resize handles
 config.window_decorations = wezterm.target_triple:find("linux") and "NONE" or "RESIZE"
 config.window_padding = { left = 16, right = 16, top = 12, bottom = 12 }
-config.macos_window_background_blur = 28
+-- macos_window_background_blur removed: causes persistent high GPU usage via
+-- macOS WindowServer (upstream #5555); no fix possible from config side.
 config.background = {
   {
     source = { Color = theme.base },
     width = "100%",
     height = "100%",
-    opacity = 0.965,
+    opacity = 1.0,
   },
   {
     source = { Gradient = {
