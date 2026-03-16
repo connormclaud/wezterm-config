@@ -8,7 +8,7 @@ local health = require("health")
 local help   = require("help")
 local keys   = require("keys")
 local resize = require("resize")
-local border = require("border")
+require("border")
 
 -- Typography: slightly larger + tighter rhythm for readability/polish
 config.font = wezterm.font_with_fallback({
@@ -109,7 +109,7 @@ end)
 -- Rendering
 config.enable_wayland = true
 config.front_end = "WebGpu"
-config.webgpu_power_preference = "LowPower"
+config.webgpu_power_preference = wezterm.target_triple:find("darwin") and "HighPerformance" or "LowPower"
 
 -- Misc
 config.enable_kitty_keyboard = true
@@ -132,7 +132,6 @@ theme.setup_tab_title()
 wezterm.on("update-status", function(window, pane)
   pcall(tmux.update_left_status, window, pane)
   pcall(health.update_right_status, window, pane)
-  pcall(border.update_border, window)
 end)
 
 return config
