@@ -66,27 +66,6 @@ config.visual_bell = {
   target = "CursorColor",
 }
 
--- Initial window size: ~75% of screen, centered
--- Uses window-config-reloaded instead of gui-startup because
--- wezterm.gui.screens() is unavailable during gui-startup (#6936)
-wezterm.on("window-config-reloaded", function(window, pane)
-  local id = tostring(window:window_id())
-  local seen = wezterm.GLOBAL.seen_windows or {}
-  if seen[id] then return end
-  seen[id] = true
-  wezterm.GLOBAL.seen_windows = seen
-
-  local ok, screens = pcall(wezterm.gui.screens)
-  if not ok or not screens.active then return end
-  local screen = screens.active
-  local w = math.floor(screen.width * 0.75)
-  local h = math.floor(screen.height * 0.75)
-  local x = math.floor((screen.width - w) / 2)
-  local y = math.floor((screen.height - h) / 2)
-  window:set_position(x, y)
-  window:set_inner_size(w, h)
-end)
-
 -- Rendering
 config.enable_wayland = true
 config.front_end = "WebGpu"
