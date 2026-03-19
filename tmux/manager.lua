@@ -4,6 +4,8 @@ local core = require("tmux.core")
 local theme = require("theme")
 local claude = require("claude")
 
+local wezterm_cli = wezterm.executable_dir .. "/wezterm"
+
 local M = {}
 
 -- Returns { [session_name] = { cc = bool, other = bool } }
@@ -264,21 +266,68 @@ local function action_choices(session_name, cc)
   return choices
 end
 
+-- Kill stale tmux-domain panes in a workspace. Enumerates via mux API
+-- (synchronous, no socket) and fires kill commands via background_child_process
+-- (non-blocking, no deadlock). Returns true if stale panes were found.
+local function kill_workspace_panes(workspace_name)
+  local pane_ids = {}
+  local ok, all_windows = pcall(wezterm.mux.all_windows)
+  if not ok or not all_windows then return false end
+  for _, mux_win in ipairs(all_windows) do
+    if mux_win:get_workspace() == workspace_name then
+      for _, tab in ipairs(mux_win:tabs()) do
+        for _, pane in ipairs(tab:panes()) do
+          if core.is_cc(pane) then
+            table.insert(pane_ids, tostring(pane:pane_id()))
+          end
+        end
+      end
+    end
+  end
+  if #pane_ids == 0 then return false end
+  local parts = {}
+  for _, id in ipairs(pane_ids) do
+    table.insert(parts, string.format("%q cli kill-pane --pane-id=%s", wezterm_cli, id))
+  end
+  wezterm.background_child_process({ "sh", "-c", table.concat(parts, "; ") })
+  return true
+end
+
+local function cc_attach_spawn(session_name)
+  return {
+    domain = { DomainName = "local" },
+    args = {
+      "sh", "-c",
+      'printf \'\\033]1337;SetUserVar=%s=%s\\007\' tmux_cc_control dHJ1ZQ== && exec "$0" "$@"',
+      core.bin, "-CC", "attach", "-t", session_name,
+    },
+  }
+end
+
 local function do_attach(win, p, session_name)
-  win:perform_action(
-    act.SwitchToWorkspace({
-      name = session_name,
-      spawn = {
-        domain = { DomainName = "local" },
-        args = {
-          "sh", "-c",
-          'printf \'\\033]1337;SetUserVar=%s=%s\\007\' tmux_cc_control dHJ1ZQ== && exec "$0" "$@"',
-          core.bin, "-CC", "attach", "-t", session_name,
-        },
-      },
-    }),
-    p
-  )
+  if not kill_workspace_panes(session_name) then
+    -- No stale workspace: SwitchToWorkspace with spawn works immediately.
+    win:perform_action(
+      act.SwitchToWorkspace({
+        name = session_name,
+        spawn = cc_attach_spawn(session_name),
+      }),
+      p
+    )
+    return
+  end
+  -- Stale workspace existed: wait for pane kills, then spawn fresh CC pane.
+  wezterm.time.call_after(0.5, function()
+    local spawn_args = cc_attach_spawn(session_name)
+    spawn_args.workspace = session_name
+    local sok, err = pcall(function()
+      wezterm.mux.spawn_window(spawn_args)
+      wezterm.mux.set_active_workspace(session_name)
+    end)
+    if not sok then
+      wezterm.log_warn("do_attach spawn failed: " .. tostring(err))
+    end
+  end)
 end
 
 local function show_actions(window, pane, session_name, cc)
@@ -296,6 +345,7 @@ local function show_actions(window, pane, session_name, cc)
           )
         elseif action_id == "detach" then
           wezterm.run_child_process({ core.bin, "detach-client", "-s", session_name })
+          wezterm.time.call_after(1, function() kill_workspace_panes(session_name) end)
         elseif action_id == "attach" then
           do_attach(win, p, session_name)
         elseif action_id == "rename" then
@@ -406,6 +456,7 @@ local function show_sessions(window, pane)
         local detach_target = id:match("^detach:(.+)$")
         if detach_target then
           wezterm.run_child_process({ core.bin, "detach-client", "-s", detach_target })
+          wezterm.time.call_after(1, function() kill_workspace_panes(detach_target) end)
           show_sessions(win, p)
           return
         end
