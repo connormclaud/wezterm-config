@@ -91,20 +91,21 @@ This uses [Claude Code hooks](https://code.claude.com/docs/en/hooks). Add to `~/
       }
     ],
     "PostToolUse": [{
-      "matcher": "AskUserQuestion|ExitPlanMode",
       "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh running", "async": true }]
     }],
     "PermissionRequest": [{
       "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh asking", "async": true }]
     }],
-    "Notification": [{
-      "matcher": "permission_prompt|elicitation_dialog",
-      "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh asking", "async": true }]
-    }],
     "SubagentStart": [{
       "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh running", "async": true }]
     }],
+    "Elicitation": [{
+      "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh asking", "async": true }]
+    }],
     "Stop": [{
+      "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh idle", "async": true }]
+    }],
+    "StopFailure": [{
       "hooks": [{ "type": "command", "command": "$HOME/.config/wezterm/hooked/claude-state.sh idle", "async": true }]
     }],
     "SessionEnd": [{
