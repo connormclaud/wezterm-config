@@ -68,8 +68,6 @@ config.visual_bell = {
 
 -- Rendering
 config.enable_wayland = true
-config.front_end = "WebGpu"
-config.webgpu_power_preference = "LowPower"
 
 -- Misc
 config.enable_kitty_keyboard = true

@@ -55,6 +55,10 @@ wezterm --config-file ~/.config/wezterm/wezterm.lua ls-fonts
 
 Errors appear in WezTerm's debug overlay: `Ctrl+Shift+L`. Runtime logs live at `/run/user/$UID/wezterm/wezterm-gui-log-*.txt` (most recent file is the active session). After making changes, check the log for new warnings — but note the debug overlay shows the full session history including transient errors from earlier hot-reloads, so always check timestamps.
 
+## Known Pitfalls
+
+- **Do NOT use `front_end = "WebGpu"` on macOS.** It causes windows to not redraw until user input (blank htop, frozen output). The default OpenGL frontend works correctly. Root cause is upstream: macOS view's `wantsUpdateLayer` returns YES with a noop `updateLayer`, breaking the paint trigger chain. OpenGL is immune because ANGLE drives frames via `eglSwapBuffers` independently. See [wezterm/wezterm#7017](https://github.com/wezterm/wezterm/issues/7017).
+
 ## Key Conventions
 
 - Config is pure Lua using the WezTerm API (`wezterm` module)
