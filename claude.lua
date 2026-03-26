@@ -17,14 +17,5 @@ theme.register_pane_style(function(tab)
   return M.style_for_state(tab.active_pane.user_vars.claude_state)
 end)
 
--- WORKAROUND: Reset kitty keyboard protocol when Claude Code exits.
--- Claude pushes the protocol multiple times and sometimes fails to pop on exit,
--- leaving the terminal in enhanced keyboard mode (anthropics/claude-code#38761).
--- Remove when fixed upstream.
-wezterm.on("user-var-changed", function(window, pane, name, value)
-  if name == "claude_state" and value == "" then
-    pane:inject_output("\x1b[=0u\x1b[<99u")
-  end
-end)
 
 return M
