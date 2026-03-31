@@ -11,7 +11,7 @@ Modular [WezTerm](https://wezfurlong.org/wezterm/) configuration with Catppuccin
 - **Catppuccin Mocha** color scheme with polished translucent background, tuned typography, powerline tab bar, and active-pane focus contrast
 - **Tmux integration** — auto-detects tmux panes, session picker (`Ctrl+Shift+A`), context-aware tab rename
 - **20-20-20 health reminders** — status bar warning every 20 minutes to look away for 20 seconds
-- **Claude Code tab tracking** — Nerd Font icons and colored powerline tabs by state: 󰚩 running (blue), asking (peach), 󰄬 idle (green)
+- **Agent tab tracking** — Claude Code and Codex surface Nerd Font icons and colored powerline tabs by state: 󰚩 running (blue), asking (peach, Claude-only), 󰄬 idle (green)
 - **F1 cheat sheet** — overlay listing all keybindings
 
 ## Structure
@@ -25,8 +25,8 @@ Modular [WezTerm](https://wezfurlong.org/wezterm/) configuration with Catppuccin
 | `tmux.lua` | Tmux detection, binary resolution, session picker, left status |
 | `health.lua` | 20-20-20 reminder with toggle |
 | `help.lua` | F1 keybinding cheat sheet |
-| `hooked/claude-state.sh` | Claude Code hook — emits WezTerm user vars for tab state (Linux) |
-| `hooked/claude-state.zsh` | Claude Code hook — same as above (macOS) |
+| `hooked/claude-state.sh` | Shared Claude Code / Codex hook — emits WezTerm user vars for tab state (Linux) |
+| `hooked/claude-state.zsh` | Shared Claude Code / Codex hook — same as above (macOS) |
 
 ## Keybindings
 
@@ -54,7 +54,7 @@ WezTerm hot-reloads on save. To validate syntax:
 wezterm --config-file ~/.config/wezterm/wezterm.lua ls-fonts
 ```
 
-## Claude Code Tab Tracking
+## Claude Code And Codex Tab Tracking
 
 Active tabs show state as a colored powerline pill; inactive tabs show compact colored badges (state and/or unseen output):
 
@@ -65,6 +65,8 @@ Active tabs show state as a colored powerline pill; inactive tabs show compact c
 | Idle | 󰄬 | Green | Pill bg | Colored badge |
 
 Requires [Symbols Nerd Font Mono](https://www.nerdfonts.com/) installed as a font fallback.
+
+Claude Code supports all three states. Codex currently supports `running` and `idle` only because its hook surface does not yet expose a reliable asking/input-needed event.
 
 State clears automatically when Claude Code exits (`SessionEnd` hook).
 
@@ -116,6 +118,90 @@ This uses [Claude Code hooks](https://code.claude.com/docs/en/hooks). Add to `~/
 ```
 
 On macOS, use `claude-state.zsh` instead — it resolves the TTY via `ps` rather than `/proc`.
+
+### Codex Setup
+
+Codex hooks are currently experimental and configured globally rather than through this repo.
+
+In `~/.codex/config.toml`:
+
+```toml
+[features]
+codex_hooks = true
+```
+
+In `~/.codex/hooks.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.config/wezterm/hooked/claude-state.sh idle"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.config/wezterm/hooked/claude-state.sh running"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.config/wezterm/hooked/claude-state.sh running"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.config/wezterm/hooked/claude-state.sh running"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.config/wezterm/hooked/claude-state.sh idle"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Codex does not currently expose a `SessionEnd` hook, so clear the state from your shell wrapper after the `codex` process exits:
+
+```bash
+codex() {
+  command codex "$@"
+  local status=$?
+  "$HOME/.config/wezterm/hooked/claude-state.sh"
+  return $status
+}
+```
 
 ## See Also
 

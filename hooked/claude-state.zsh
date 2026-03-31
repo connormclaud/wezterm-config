@@ -1,7 +1,7 @@
 #!/bin/zsh
-# Claude Code hook: emit WezTerm user var for tab state tracking (macOS).
+# Shared Claude Code / Codex hook: emit WezTerm user var for tab state tracking (macOS).
 # Usage: claude-state.zsh [running|asking|idle]
-# No argument clears the state (SessionEnd).
+# No argument clears the state (Claude SessionEnd or Codex shell wrapper).
 #
 # Claude Code redirects hook stdout, so we walk the process tree
 # via ps to find the ancestor PTY and write the OSC escape directly.

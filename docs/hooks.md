@@ -1,6 +1,24 @@
 # Hook State Machine
 
-How Claude Code tab state tracking works and why certain hooks are avoided.
+How the shared WezTerm tab-state scripts are used today.
+
+Claude Code uses the full `idle` / `running` / `asking` state machine below. Codex currently reuses the same script transport, but only drives `idle` and `running`.
+
+## Codex Support
+
+Current Codex hook mapping:
+
+| Event | Matcher | Emits |
+|-------|---------|-------|
+| SessionStart | `startup\|resume` | idle |
+| UserPromptSubmit | -- | running |
+| PreToolUse | `Bash` | running |
+| PostToolUse | `Bash` | running |
+| Stop | -- | idle |
+
+Known limitation: Codex does not currently expose `SessionEnd`, so badge clearing after exit is handled by a shell wrapper that calls the shared script with no argument.
+
+## Claude Code State Machine
 
 ## States
 
