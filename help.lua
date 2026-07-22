@@ -46,7 +46,7 @@ local choices = format_columns({
     header = "── Tabs ──────────────────────────────────────────────────────────────",
     items = {
       { "F2",                  "Rename tab / tmux window" },
-      { "Shift+Enter",        "CSI u sequence (tmux-safe)" },
+      { "Shift+Enter",        "Newline (Ctrl+J, tmux-safe)" },
       { "Ctrl+Shift+PgUp/Dn", "Move tab left / right" },
       { "Ctrl+Shift+A",       "Tmux session manager" },
       { "Ctrl+Shift+G",       "Open/close Claude agent tabs" },

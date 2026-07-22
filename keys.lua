@@ -13,8 +13,9 @@ function M.keys()
     { key = "K", mods = "CTRL|SHIFT", action = tmux.kill_pane_action() },
     -- Quick pane selection overlay with numeric labels
     { key = "o", mods = "CTRL|SHIFT", action = act.PaneSelect({ alphabet = "1234567890" }) },
-    -- Shift+Enter: send CSI u sequence explicitly so it survives tmux
-    { key = "Enter", mods = "SHIFT", action = act.SendString("\x1b[13;2u") },
+    -- Shift+Enter: send Ctrl+J (plain LF) — newline in Claude Code, works in both
+    -- the main TUI and agent attach view (CSI u \x1b[13;2u did not), survives tmux
+    { key = "Enter", mods = "SHIFT", action = act.SendString("\x0a") },
     -- Rename current tab / tmux window (F2 = universal rename key)
     { key = "F2", action = tmux.rename_tab_action() },
     -- Move tab left/right (syncs tmux CC window order)

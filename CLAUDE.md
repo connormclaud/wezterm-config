@@ -13,7 +13,7 @@ The config uses `wezterm.config_builder()` with a modular structure:
 - **`wezterm.lua`** — entry point; loads modules, merges keybindings from each module's `keys()` export, sets up the `update-status` event (left status from tmux, right status from health)
 - **`theme.lua`** — catppuccin mocha palette (single source of truth); powerline glyph and Nerd Font icon constants; owns `format-tab-title` with retro tab bar powerline rendering and `register_pane_style(fn)` for module-injected per-pane styling
 - **`claude.lua`** — registers Claude Code tab state styles (running/asking/idle) with theme via `register_pane_style`; returns `{ bg, fg, icon, bold }` tables consumed by theme's powerline renderer; uses static colors (no escalation) for performance
-- **`keys.lua`** — declarative keybinding table: pane splits, Shift+Enter CSI u passthrough, plus tmux action factories from `tmux/` (kill pane, rename tab, move tab)
+- **`keys.lua`** — declarative keybinding table: pane splits, Shift+Enter sends Ctrl+J/LF (newline in Claude Code, works in agent attach view where CSI u didn't), plus tmux action factories from `tmux/` (kill pane, rename tab, move tab)
 - **`tmux/`** — modular tmux integration, loaded as `require("tmux")` via `tmux/init.lua`:
   - **`tmux/init.lua`** — re-exports public API from submodules
   - **`tmux/core.lua`** — `bin` (path resolution at config load), `detect(pane)`, `is_cc(pane)`
@@ -37,7 +37,7 @@ Twelve custom keys across six modules:
 | `Ctrl+Shift+D` | Split horizontal | `keys.lua` |
 | `Ctrl+Shift+E` | Split vertical | `keys.lua` |
 | `Ctrl+Shift+K` | Kill pane (no confirm) | `keys.lua` → `tmux.kill_pane_action` |
-| `Shift+Enter` | CSI u sequence (tmux-safe) | `keys.lua` |
+| `Shift+Enter` | Newline via Ctrl+J/LF (tmux-safe) | `keys.lua` |
 | `F2` | Rename tab / tmux window | `keys.lua` → `tmux.rename_tab_action` |
 | `Ctrl+Shift+PageUp` | Move tab left | `keys.lua` → `tmux.move_tab_action` |
 | `Ctrl+Shift+PageDown` | Move tab right | `keys.lua` → `tmux.move_tab_action` |
