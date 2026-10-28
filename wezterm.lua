@@ -12,8 +12,11 @@ local agents = require("agents")
 require("border")
 
 -- Typography: slightly larger + tighter rhythm for readability/polish
+-- Nerd Font build ships one TTF per face; the Homebrew "Iosevka" cask is a
+-- 324-face TTC that WezTerm re-parses per matched face on every font cache
+-- miss, freezing the GUI for seconds on macOS
 config.font = wezterm.font_with_fallback({
-  { family = "Iosevka", weight = "Medium" },
+  { family = "Iosevka Nerd Font Mono", weight = "Medium" },
   "Symbols Nerd Font Mono",
 })
 config.font_size = 14.5
