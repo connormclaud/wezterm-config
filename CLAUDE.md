@@ -59,6 +59,7 @@ Errors appear in WezTerm's debug overlay: `Ctrl+Shift+L`. Runtime logs live at `
 
 ## Known Pitfalls
 
+- **Do NOT use a font installed as a big `.ttc` on macOS** (e.g. Homebrew `font-iosevka`, a 324-face, 460 MB `Iosevka.ttc`). On every font cache miss the CoreText locator re-parses the whole file once per matching face, on the main thread during paint, so the GUI freezes for seconds (worst on tab switch, when a pane needs a style not loaded since the last cache clear). The cache is cleared by every `config_was_reloaded`, which includes each `window:set_config_overrides` call (`border.lua`). Use one-file-per-face TTFs instead (`font-iosevka-nerd-font` → `"Iosevka Nerd Font Mono"`). Cold `ls-fonts`: 22.8s with the TTC vs 0.2s with the TTFs. Diagnose with `sample $(pgrep -x wezterm-gui) 120` and look for `resolve_font` → `CoreTextFontLocator::load_fonts` on the main thread.
 - **Do NOT use `front_end = "WebGpu"` on macOS.** It causes windows to not redraw until user input (blank htop, frozen output). The default OpenGL frontend works correctly. Root cause is upstream: macOS view's `wantsUpdateLayer` returns YES with a noop `updateLayer`, breaking the paint trigger chain. OpenGL is immune because ANGLE drives frames via `eglSwapBuffers` independently. See [wezterm/wezterm#7017](https://github.com/wezterm/wezterm/issues/7017).
 
 ## Key Conventions
